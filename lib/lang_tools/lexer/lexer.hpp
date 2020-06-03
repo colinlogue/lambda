@@ -45,10 +45,10 @@ namespace lang_tools
         template <typename T>
         friend auto operator !=(const token_iterator<T>& lhs, const token_iterator<T>& rhs) -> bool;
 
-        auto operator ++() -> token_iterator&;
+        auto operator ++()    -> token_iterator&;
         auto operator ++(int) -> token_iterator;
-        auto operator *() -> LexResult<Token>&;
-        auto operator ->() -> LexResult<Token>*;
+        auto operator  *()    -> LexResult<Token>&;
+        auto operator ->()    -> LexResult<Token>*;
 
         auto read_next() -> LexResult<Token>&;
 
@@ -58,18 +58,18 @@ namespace lang_tools
         {
         public:
             const Lexer<Token> reader;
-            ::std::istream& source;
+            std::istream& source;
             LexResult<Token> current;
-            data_t(Lexer<Token> reader, ::std::istream& source)
+            data_t(Lexer<Token> reader, std::istream& source)
                 : reader {reader}, source {source}, current {reader(source)}
             {}
         };
 
-        ::std::optional<data_t> data {};
+        std::optional<data_t> data {};
 
         auto unsafe_get_current() -> LexResult<Token>&;
-        auto unsafe_get_reader() -> const Lexer<Token>&;
-        auto unsafe_get_source() -> ::std::istream&;
+        auto unsafe_get_reader()  -> const Lexer<Token>&;
+        auto unsafe_get_source()  -> std::istream&;
     };
 
 
@@ -105,8 +105,8 @@ namespace lang_tools
     {
         LexResult<Token>& current = unsafe_get_current();
         const Lexer<Token>& reader = unsafe_get_reader();
-        ::std::istream& source = unsafe_get_source();
-        if (!bool(source))
+        std::istream& source = unsafe_get_source();
+        if (source.peek() < 0)
             data.reset();
         else
             current = reader(source);
@@ -122,7 +122,7 @@ namespace lang_tools
     auto token_iterator<Token>::operator*() -> LexResult<Token>&
     {
         if (!(data.has_value()))
-            throw ::std::out_of_range("no result available");
+            throw std::out_of_range("no result available");
         return unsafe_get_current();
     }
 
@@ -139,8 +139,8 @@ namespace lang_tools
     }
 
     template<typename Token>
-    token_iterator<Token>::token_iterator(Lexer<Token> reader, ::std::istream& source)
-        : data { ::std::in_place, reader, source }
+    token_iterator<Token>::token_iterator(Lexer<Token> reader, std::istream& source)
+        : data { std::in_place, reader, source }
     {}
 
     template<typename Token>
@@ -156,7 +156,7 @@ namespace lang_tools
     }
 
     template<typename Token>
-    auto token_iterator<Token>::unsafe_get_source() -> ::std::istream&
+    auto token_iterator<Token>::unsafe_get_source() -> std::istream&
     {
         return data.value().source;
     }

@@ -19,6 +19,8 @@ namespace lambda
         std::string value {};
     };
 
+    using LexResult = lang_tools::LexResult<Token>;
+
     auto read(std::istream& in)  -> std::vector<Token>;
     auto read(std::string in)    -> std::vector<Token>;
 

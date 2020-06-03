@@ -14,39 +14,12 @@
 using std::optional;
 using std::string;
 using std::stringstream;
-using lang_tools::LexResult;
 using lang_tools::is_whitespace;
 using lang_tools::lowercase;
 
 namespace lambda
 {
-
-    auto to_token(string str) -> optional<Token>
-    {
-        string name {lowercase(str)};
-        optional<Token> maybe;
-
-        // get next token
-        if (name == "(")
-            maybe = {TokenType::LeftParen, name};
-
-        else if (name == ")")
-            maybe = {TokenType::RightParen, name};
-
-        else if (name == "\\")
-            maybe = {TokenType::Lambda, name};
-
-        else if (name == ".")
-            maybe = {TokenType::Dot, name};
-
-        else if (std::all_of(name.begin(), name.end(),
-                [] (const char c) -> bool { return std::isalpha(c); }))
-            maybe = {TokenType::Name, name};
-
-        return maybe;
-    }
-
-    auto lex(std::istream& in) -> LexResult<Token>
+    auto lex(std::istream& in) -> LexResult
     {
         char c;
         stringstream buffer {};
@@ -57,19 +30,47 @@ namespace lambda
             in.get();
         }
 
-        // read in until next whitespace
-        while (in.get(c) && !is_whitespace(c))
+        // check for single-character tokens
+        optional<TokenType> ttype;
+        switch (in.peek())
         {
-            buffer << c;
+            case '\\':
+                ttype = TokenType::Lambda;
+                break;
+            case '.':
+                ttype = TokenType::Dot;
+                break;
+            case '(':
+                ttype = TokenType::LeftParen;
+                break;
+            case ')':
+                ttype = TokenType::RightParen;
+                break;
         }
 
-        // try to match token
-        std::optional<Token> maybe_token {to_token(buffer.str())};
-        if (maybe_token.has_value())
-            return LexResult<Token>::make_ok(maybe_token.value());
+        // if matched any tokens, return
+        if (ttype.has_value())
+        {
+            in.get(c);
+            return LexResult::make_ok(Token{ttype.value(), string{c}});
+        }
 
-        // otherwise return failure
-        return LexResult<Token>::make_err("Unable to match token: " + buffer.str());
+        // otherwise, try to read as name
+        if (std::isalpha(in.peek()))
+        {
+            // read in until next non-alpha char
+            while (std::isalpha(in.peek()))
+            {
+                in.get(c);
+                buffer << c;
+            }
+
+            return LexResult::make_ok(Token{TokenType::Name, buffer.str()});
+        }
+
+        // if no matches, return failure
+        in.get(c);
+        return LexResult::make_err("Unable to match character: " + string {c});
     }
 
     auto as_string(TokenType token) -> std::string
