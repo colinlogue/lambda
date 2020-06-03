@@ -1,6 +1,8 @@
 //
 // Created by colin on 6/2/20.
 //
+#include <sstream>
+#include <utility>
 #include <variant>
 
 #include "lang_tools/parse/parse.hpp"
@@ -144,4 +146,99 @@ namespace lambda
 
     }
 
+    class TermPrinter
+    {
+    public:
+        TermPrinter() = default;
+
+        auto operator ()(Variable var) -> std::string
+        {
+            return var.name;
+        }
+
+        auto operator ()(Abstraction abstr) -> std::string
+        {
+            std::stringstream str;
+            str << "\\" << abstr.name << "." << *abstr.body;
+            return str.str();
+        }
+
+        auto operator ()(Application appl) -> std::string
+        {
+            std::stringstream str;
+            str << *appl.lhs << " " << *appl.rhs;
+            return str.str();
+        }
+    };
+
+    auto as_string(const Term& term) -> std::string
+    {
+        return std::visit(TermPrinter {}, term);
+    }
+
+    auto operator <<(std::ostream& out, const Term& term) -> std::ostream&
+    {
+        out << as_string(term);
+        return out;
+    }
+
+    auto rename(std::string orig) -> std::string
+    {
+        return orig + "`";
+    }
+
+    class Substitutor
+    {
+    public:
+
+        Substitutor() = delete;
+        Substitutor(Substitution sub) : sub {std::move(sub)} {}
+
+        auto operator ()(Variable var)      -> Term;
+        auto operator ()(Abstraction abstr) -> Term;
+        auto operator ()(Application appl)  -> Term;
+
+    private:
+        Substitution sub;
+    };
+
+    auto Substitutor::operator()(Variable var) -> Term
+    {
+        if (var.name == sub.first)
+            return sub.second;
+
+        return var;
+    }
+
+    auto Substitutor::operator()(Abstraction abstr) -> Term
+    {
+        // if name conflict, rename bound variable terms and call again
+        if (abstr.name.name == sub.first)
+        {
+            std::string new_name {rename(abstr.name.name)};
+            Substitution sub2 {abstr.name.name, Variable {new_name}};
+            return substitute(sub, Abstraction {new_name, substitute(sub2, *abstr.body)});
+        }
+        return Abstraction {abstr.name, substitute(sub, *abstr.body)};
+    }
+
+    auto Substitutor::operator()(Application appl) -> Term
+    {
+        // sub each side
+        return Application {substitute(sub, *appl.lhs), substitute(sub, *appl.rhs)};
+    }
+
+    auto substitute(Substitution sub, const Term& term) -> Term
+    {
+        return std::visit(Substitutor(std::move(sub)), term);
+    }
+
+    auto compare(const Term& lhs, const Term& rhs) -> bool
+    {
+
+            auto lhs_as_var {std::get_if<Variable>(&lhs)};
+            auto rhs_as_var {std::get_if<Variable>(&rhs)};
+
+        return false;
+    }
 }

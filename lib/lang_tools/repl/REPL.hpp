@@ -270,11 +270,11 @@ namespace lang_tools
 
             Value* val {eval_result.get_ok()};
             if (val != nullptr)
-                out << val << std::endl;
+                out << *val << std::endl;
             else // evaluation error
             {
                 EvalErr* eval_err {eval_result.get_err()};
-                out << "evaluation error: " << eval_err << std::endl;
+                out << "evaluation error: " << *eval_err << std::endl;
             }
             return;
         }

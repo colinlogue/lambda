@@ -14,12 +14,15 @@
 
 namespace lambda
 {
-    class Value {};
+    using Context = lang_tools::Context<Term>;
+
+    using Value = Abstraction;
 
     using EvalResult = result::Result<Value, lang_tools::EvalErr>;
 
-    auto evaluate(Term term, std::unordered_map<std::string, Term> context)
-            -> result::Result<Value, lang_tools::EvalErr>;
+    auto reduce(const Term& term) -> Term;
+
+    auto evaluate(const Term& term, const Context& context) -> EvalResult;
 };
 
 
