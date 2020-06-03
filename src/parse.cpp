@@ -7,6 +7,7 @@
 #include "result/Result.hpp"
 #include "parse.h"
 
+
 //      Grammar
 //      -------
 //    Term ->	Abst
@@ -17,6 +18,7 @@
 //    Atom ->	( Term )
 //          |	Name
 //    Name →	[a-zA-Z]+
+//
 
 namespace lambda
 {

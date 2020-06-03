@@ -121,7 +121,7 @@ namespace lang_tools
 
             auto begin() -> token_iterator<Token>
             {
-                return token_iterator<Token>(owner.lexer);
+                return token_iterator<Token>(owner.lexer, in);
             }
 
             auto end() -> token_iterator<Token>
@@ -149,7 +149,7 @@ namespace lang_tools
         {
             while (!(state.exit_flag))
             {
-                loop();
+                loop(buffer, stream);
             }
         }
         catch (std::exception& e)
@@ -227,7 +227,7 @@ namespace lang_tools
         // run command if input was a match
         if (cmd != commands.end())
         {
-            std::optional<std::string> maybe_message{cmd.run(state, buffer)};
+            std::optional<std::string> maybe_message {(cmd->second).run(state, buffer)};
             if (maybe_message.has_value())
                 out << maybe_message.value() << std::endl;
         }
@@ -239,11 +239,11 @@ namespace lang_tools
 
             // get tokens
             std::queue<Token> tokens;
-            for (LexResult<Token>& result : token_stream(stream))
+            for (LexResult<Token>& result : token_stream(*this, stream))
             {
                 Token* ok {result.get_ok()};
                 if (ok != nullptr)
-                    tokens.push(ok);
+                    tokens.push(*ok);
                 else
                 {
                     LexErr* err {result.get_err()};
@@ -266,7 +266,7 @@ namespace lang_tools
             // no parse error
             // attempt to evaluate term in context
             Term* ok {parse_result.get_ok()};
-            EvalResult<Value> eval_result {*ok, context};
+            EvalResult<Value> eval_result {evaluator(*ok, context)};
 
             Value* val {eval_result.get_ok()};
             if (val != nullptr)

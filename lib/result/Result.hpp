@@ -51,7 +51,8 @@ namespace result
         template <typename ErrB>
         auto map_err(std::function<ErrB(ErrType)> f) -> Result<OkType, ErrB>;
 
-        virtual auto andThen(std::function<Result(OkType)> f) -> Result&;
+        template <typename OkB>
+        auto and_then(std::function<Result<OkB, ErrType>(OkType)> f) -> Result<OkB, ErrType>;
 
     private:
         constexpr static size_t ok_index = 0;
@@ -96,12 +97,13 @@ namespace result
     {}
 
     template<typename OkType, typename ErrType>
-    auto Result<OkType, ErrType>::andThen(std::function<Result(OkType)> f) -> Result
+    template<typename OkB>
+    auto Result<OkType, ErrType>::and_then(std::function<Result<OkB,ErrType>(OkType)> f) -> Result<OkB, ErrType>
     {
         auto ok = std::get_if<ok_index>(&data);
-        // if the value is ok, apply f to it and assign the result to this
         if (ok)
-            return Result
+            return make_ok(f(*ok));
+        return make_err(*get_err());
     }
 
     template<typename OkType, typename ErrType>

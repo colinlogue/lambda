@@ -16,6 +16,8 @@ namespace lambda
 {
     class Value {};
 
+    using EvalResult = result::Result<Value, lang_tools::EvalErr>;
+
     auto evaluate(Term term, std::unordered_map<std::string, Term> context)
             -> result::Result<Value, lang_tools::EvalErr>;
 };

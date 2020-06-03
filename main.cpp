@@ -15,4 +15,5 @@ int main()
 {
 
     REPL<Token, Term, Value> repl {lex, parse, evaluate};
+    repl.run();
 }
