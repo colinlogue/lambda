@@ -20,7 +20,7 @@ add_library(
         lib/lang_tools/utils/utils.cpp
         lib/lang_tools/parse/parse.hpp
         lib/lang_tools/eval/eval.hpp
-)
+        src/helpers.h)
 
 add_executable(
         lambda_run

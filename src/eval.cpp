@@ -73,9 +73,9 @@ namespace lambda
         return {std::visit(reducer, term)};
     }
 
-    auto reduce(const Term& term) -> Term
+    auto reduce(const Term& term, const Context& context) -> Term
     {
-        Reducer reducer {};
+        Reducer reducer {context};
         return reducer.reduce(term);
     }
 

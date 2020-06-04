@@ -43,10 +43,8 @@ namespace lambda
         const term_ptr lhs;
         const term_ptr rhs;
 
-        auto operator ==(const Application& other) const -> bool
-        {
-            return compare;
-        }
+        auto operator ==(const Application& other) const -> bool;
+
     };
 
     struct Abstraction {
@@ -57,9 +55,9 @@ namespace lambda
         const Variable name;
         const term_ptr body;
 
-        auto operator ==(const Variable& other) const -> bool
+        auto operator ==(const Abstraction& other) const -> bool
         {
-            return name == other.name;
+            return name == other.name && compare(*body, *other.body);
         }
     };
 
@@ -76,6 +74,8 @@ namespace lambda
     auto as_string(const Term& term) -> std::string;
 
     auto operator <<(std::ostream& out, const Term& term) -> std::ostream&;
+
+    auto parse_string(std::string str) -> std::optional<Term>;
 }
 
 #endif //LAMBDA_PARSE_H

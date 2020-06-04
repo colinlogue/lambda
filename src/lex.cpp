@@ -96,6 +96,29 @@ namespace lambda
         throw std::logic_error("Unknown token type");
     }
 
+    /**
+     * This currently just returns a vector of all the tokens that were able to
+     * be parsed and just discards any that failed. That's obviously not great
+     * behavior so planning to revamp this at some point.
+     */
+    auto read(std::istream& in)  -> std::vector<Token>
+    {
+        TokenStream stream {in};
+        std::vector<Token> tokens {};
+        for (auto token : stream)
+        {
+            if (token.is_ok())
+                tokens.push_back(*token.get_ok());
+        }
+        return tokens;
+    }
+
+    auto read(std::string in)    -> std::vector<Token>
+    {
+        std::stringstream stream {in};
+        return read(stream);
+    }
+
 
     TokenStream::TokenStream(std::istream& source)
         : source {source}

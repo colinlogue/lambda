@@ -13,7 +13,14 @@ using namespace lambda;
 
 int main()
 {
-
-    REPL<Token, Term, Value> repl {lex, parse, evaluate};
+    // trying out just reducing for the repl than evaluating to an abstraction
+    // REPL<Token, Term, Value> repl {lex, parse, evaluate};
+    REPL<Token, Term, Term> repl {lex, parse,
+                          [](Term term, Context context)
+                          {
+                                return result::Result<Term, lang_tools::EvalErr>
+                                        ::make_ok(reduce(term, context));
+                          }
+    };
     repl.run();
 }

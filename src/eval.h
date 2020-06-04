@@ -20,7 +20,7 @@ namespace lambda
 
     using EvalResult = result::Result<Value, lang_tools::EvalErr>;
 
-    auto reduce(const Term& term) -> Term;
+    auto reduce(const Term& term, const Context& context = {}) -> Term;
 
     auto evaluate(const Term& term, const Context& context) -> EvalResult;
 };

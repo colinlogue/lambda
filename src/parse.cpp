@@ -118,7 +118,7 @@ namespace lambda
                 return subterm_result;
 
             // safe to dereference because we just checked if it was an error
-            Term& subterm {*(name_result.get_ok())};
+            Term& subterm {*(subterm_result.get_ok())};
 
             return ParseResult::make_ok(Abstraction(name, subterm));
         }
@@ -235,10 +235,41 @@ namespace lambda
 
     auto compare(const Term& lhs, const Term& rhs) -> bool
     {
+        auto lhs_as_var {std::get_if<Variable>(&lhs)};
+        auto rhs_as_var {std::get_if<Variable>(&rhs)};
+        if (lhs_as_var && rhs_as_var)
+            return *lhs_as_var == *rhs_as_var;
 
-            auto lhs_as_var {std::get_if<Variable>(&lhs)};
-            auto rhs_as_var {std::get_if<Variable>(&rhs)};
+        auto lhs_as_abstr {std::get_if<Abstraction>(&lhs)};
+        auto rhs_as_abstr {std::get_if<Abstraction>(&rhs)};
+        if (lhs_as_abstr && rhs_as_abstr)
+            return *lhs_as_abstr == *rhs_as_abstr;
+
+        auto lhs_as_appl {std::get_if<Application>(&lhs)};
+        auto rhs_as_appl {std::get_if<Application>(&rhs)};
+        if (lhs_as_appl && rhs_as_appl)
+            return *lhs_as_appl == *rhs_as_appl;
 
         return false;
+    }
+
+    auto Application::operator ==(const Application& other) const -> bool
+    {
+        return compare(*lhs, *other.lhs) && compare(*rhs, *other.rhs);
+    }
+
+    auto parse_string(std::string str) -> std::optional<Term>
+    {
+        std::stringstream stream {str};
+        auto lex_result {read(stream)};
+        std::queue<Token> tokens;
+        for (auto token : lex_result)
+        {
+            tokens.push(token);
+        }
+        auto parse_result {parse(tokens)};
+        Term* term {parse_result.get_ok()};
+        if (term) return *term;
+        return {};
     }
 }
