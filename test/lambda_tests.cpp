@@ -53,10 +53,18 @@ go_bandit([]() {
                 AssertThat(compare(parse_result.value(), tru), IsTrue());
             }
         });
-    });
-    describe("reduction tests", [&]() {
-        it ("tru doesn't reduce", [&]() {
-            AssertThat(reduce(tru), Equals(tru));
+        it("can parse application", [&]() {
+            std::string term {"(\\t.\\f.t) x y"};
+            std::optional<Term> parse_result {parse_string(term)};
+            AssertThat(parse_result.has_value(), IsTrue());
+            if (parse_result.has_value())
+            {
+                Term val {parse_result.value()};
+                Term expected {app(app(tru, "x"), "y")};
+                std::cout << "val: " << val << std:: endl;
+                std::cout << "exp: " << expected << std::endl;
+                AssertThat(val, Equals(expected));
+            }
         });
     });
 });

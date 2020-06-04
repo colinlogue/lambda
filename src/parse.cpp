@@ -77,12 +77,12 @@ namespace lambda
         if (left_result.is_err())
             return left_result;
 
-        // if nothing left, return just the atom
-        if (tokens.empty())
+        // if nothing left or closing paren, return just the atom
+        if (tokens.empty() || tokens.front().type == TokenType::RightParen)
             return left_result;
 
         // otherwise apply the atom to the remaining tokens
-        ParseResult right_result {parse_term(tokens)};
+        ParseResult right_result {parse_atom(tokens)};
 
         // if error, return the error
         if (right_result.is_err())
@@ -91,7 +91,19 @@ namespace lambda
         // otherwise both left and right are ok
         Term& left {*left_result.get_ok()};
         Term& right {*right_result.get_ok()};
-        return ParseResult::make_ok(Application(left, right));
+        Term app {Application {left, right}};
+
+        while (!tokens.empty())
+        {
+            // otherwise apply this application to remainder to get a new application
+            ParseResult rem_result{parse_atom(tokens)};
+            if (rem_result.is_err())
+                return rem_result;
+
+            app = Application(app, *rem_result.get_ok());
+        }
+
+        return ParseResult::make_ok(app);
     }
 
     auto parse_abstraction(std::queue<Token>& tokens) -> ParseResult

@@ -28,7 +28,12 @@ namespace lambda
     struct Variable {
         Variable(const char* name) : name {name} {}
         Variable(std::string name) : name {std::move(name)} {}
-        const std::string name;
+        Variable(const Variable& other) = default;
+        auto operator =(const Variable& other) -> Variable
+        {
+            name = other.name;
+        }
+        std::string name;
 
         auto operator ==(const Variable& other) const -> bool
         {
@@ -40,8 +45,10 @@ namespace lambda
         Application(const Term& lhs, const Term& rhs)
             : lhs {std::make_shared<Term>(lhs)}
             , rhs {std::make_shared<Term>(rhs)} {}
-        const term_ptr lhs;
-        const term_ptr rhs;
+        Application(const Application& other) = default;
+        auto operator =(const Application& other) -> Application& = default;
+        term_ptr lhs;
+        term_ptr rhs;
 
         auto operator ==(const Application& other) const -> bool;
 
@@ -52,8 +59,9 @@ namespace lambda
             : name {std::move(name)}, body {std::make_shared<Term>(body)} {}
         Abstraction(Variable name, Term&& body)
             : name {std::move(name)}, body {std::make_shared<Term>(body)} {}
-        const Variable name;
-        const term_ptr body;
+        Abstraction(const Abstraction& other) = default;
+        Variable name;
+        term_ptr body;
 
         auto operator ==(const Abstraction& other) const -> bool
         {
