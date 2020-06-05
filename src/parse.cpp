@@ -93,7 +93,7 @@ namespace lambda
         Term& right {*right_result.get_ok()};
         Term app {Application {left, right}};
 
-        while (!tokens.empty())
+        while (!tokens.empty() && tokens.front().type != TokenType::RightParen)
         {
             // otherwise apply this application to remainder to get a new application
             ParseResult rem_result{parse_atom(tokens)};

@@ -13,6 +13,12 @@ using namespace bandit;
 
 using namespace lambda;
 
+auto parse_test(std::string term_str, const Term& expected) -> void
+{
+    std::optional<Term> parse_result {parse_string(term_str)};
+    AssertThat(parse_result.has_value(), IsTrue());
+    AssertThat(parse_result.value(), Equals(expected));
+}
 
 go_bandit([]() {
     const Term ident {lam("x",var("x"))};
@@ -61,10 +67,21 @@ go_bandit([]() {
             {
                 Term val {parse_result.value()};
                 Term expected {app(app(tru, "x"), "y")};
-                std::cout << "val: " << val << std:: endl;
-                std::cout << "exp: " << expected << std::endl;
                 AssertThat(val, Equals(expected));
             }
+        });
+        it("can parse parenthesized variable", [&]() {
+            std::string term{"(x)"};
+            std::optional<Term> parse_result {parse_string(term)};
+            AssertThat(parse_result.has_value(), IsTrue());
+            Term val {parse_result.value()};
+            AssertThat(val, Equals(x));
+        });
+        it("can parse parenthesized application", [&]() {
+            parse_test("(x y)", app("x", "y"));
+        });
+        it("can parse parenthesized abstraction", [&]() {
+            parse_test("\\x.x", lam("x", x));
         });
     });
 });

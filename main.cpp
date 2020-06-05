@@ -6,6 +6,7 @@
 #include "src/lex.h"
 #include "src/parse.h"
 #include "src/eval.h"
+#include "src/prelude.h"
 
 
 using lang_tools::REPL;
@@ -22,5 +23,6 @@ int main()
                                         ::make_ok(reduce(term, context));
                           }
     };
+    repl.load_context(prelude);
     repl.run();
 }

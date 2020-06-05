@@ -57,6 +57,8 @@ namespace lang_tools
         auto set_welcome(std::string new_welcome) -> REPL&;
         auto set_goodbye(std::string new_goodbye) -> REPL&;
 
+        auto load_context(Context<Term> ctxt) -> REPL&;
+
     private:
         // in and out streams
         std::ostream& out {std::cout};
@@ -285,6 +287,13 @@ namespace lang_tools
             Evaluator<Value, Term> evaluator)
         : lexer {lexer}, parser {parser}, evaluator {evaluator}
     {}
+
+    template<typename Token, typename Term, typename Value>
+    auto REPL<Token, Term, Value>::load_context(Context<Term> ctxt) -> REPL&
+    {
+        context.merge(ctxt);
+        return *this;
+    }
 
     template <typename Token, typename Term, typename Value>
     REPL<Token, Term, Value>::
