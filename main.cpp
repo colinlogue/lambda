@@ -7,6 +7,7 @@
 #include "src/parse.h"
 #include "src/eval.h"
 #include "src/prelude.h"
+#include "src/numerals.h"
 
 
 using lang_tools::REPL;
@@ -19,10 +20,11 @@ int main()
     REPL<Token, Term, Term> repl {lex, parse,
                           [](Term term, Context context)
                           {
-                                return result::Result<Term, lang_tools::EvalErr>
-                                        ::make_ok(reduce(term, context));
+                                auto val {contract_term(reduce(term, context), context)};
+                                val = contract_numeral(val);
+                                return result::Result<Term, lang_tools::EvalErr>::make_ok(val);
                           }
     };
-    repl.load_context(prelude);
+    repl.load_context(get_prelude());
     repl.run();
 }

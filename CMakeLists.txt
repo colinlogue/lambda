@@ -20,7 +20,7 @@ add_library(
         lib/lang_tools/utils/utils.cpp
         lib/lang_tools/parse/parse.hpp
         lib/lang_tools/eval/eval.hpp
-        src/helpers.h)
+        src/helpers.h src/helpers.cpp src/prelude.cpp src/numerals.h src/numerals.cpp)
 
 add_executable(
         lambda_run
@@ -32,7 +32,8 @@ add_executable(
         lambda_test
         lambda
         test/lambda_tests.cpp
-)
+        test/prelude_tests.cpp
+        test/run_tests.cpp test/shared_tests.h test/shared.cpp)
 
 include_directories(src, lib)
 

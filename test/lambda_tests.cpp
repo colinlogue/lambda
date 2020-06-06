@@ -2,23 +2,10 @@
 // Created by colin on 6/3/20.
 //
 #include <iostream>
+#include <numerals.h>
 
-#include <bandit/bandit.h>
-
-#include "eval.h"
+#include "shared_tests.h"
 #include "helpers.h"
-
-using namespace snowhouse;
-using namespace bandit;
-
-using namespace lambda;
-
-auto parse_test(std::string term_str, const Term& expected) -> void
-{
-    std::optional<Term> parse_result {parse_string(term_str)};
-    AssertThat(parse_result.has_value(), IsTrue());
-    AssertThat(parse_result.value(), Equals(expected));
-}
 
 go_bandit([]() {
     const Term ident {lam("x",var("x"))};
@@ -84,8 +71,18 @@ go_bandit([]() {
             parse_test("\\x.x", lam("x", x));
         });
     });
+    describe("numeral tests", []() {
+        it("can contract zero", []() {
+            Term term {contract_numeral(parse_string("0").value())};
+            AssertThat(term, Equals(var("0")));
+        });
+        it("can contract one", []() {
+            Term term {contract_numeral(parse_string("1").value())};
+            AssertThat(term, Equals(var("1")));
+        });
+        it("can contract two", []() {
+            Term term {contract_numeral(parse_string("2").value())};
+            AssertThat(term, Equals(var("2")));
+        });
+    });
 });
-
-int main(int argc, char* argv[]) {
-    return bandit::run(argc, argv);
-}

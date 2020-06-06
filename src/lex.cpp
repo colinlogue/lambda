@@ -68,6 +68,17 @@ namespace lambda
             return LexResult::make_ok(Token{TokenType::Name, buffer.str()});
         }
 
+        if (std::isdigit(in.peek()))
+        {
+            while (std::isdigit(in.peek()))
+            {
+                in.get(c);
+                buffer << c;
+            }
+
+            return LexResult::make_ok(Token{TokenType::Numeral, buffer.str()});
+        }
+
         // if no matches, return failure
         in.get(c);
         return LexResult::make_err("Unable to match character: " + string {c});
@@ -91,6 +102,9 @@ namespace lambda
 
             case TokenType::Name:
                 return "NAME";
+
+            case TokenType::Numeral:
+                return "NUMERAL";
         }
 
         throw std::logic_error("Unknown token type");

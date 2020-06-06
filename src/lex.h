@@ -12,7 +12,7 @@
 
 namespace lambda
 {
-    enum class TokenType {Lambda, Name, Dot, LeftParen, RightParen};
+    enum class TokenType {Lambda, Name, Dot, LeftParen, RightParen, Numeral};
     struct Token
     {
         TokenType type;

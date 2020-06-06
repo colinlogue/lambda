@@ -9,19 +9,10 @@
 
 namespace lambda
 {
-    auto app(Term lhs, Term rhs) -> Term
-    {
-        return Application{lhs, rhs};
-    }
+    auto app(Term lhs, Term rhs) -> Term;
 
-    auto var(std::string name) -> Term
-    {
-        return Variable{std::move(name)};
-    }
+    auto var(std::string name) -> Term;
 
-    auto lam(std::string name, Term body) -> Term
-    {
-        return Abstraction{std::move(name), body};
-    }
+    auto lam(std::string name, Term body) -> Term;
 }
 #endif //LAMBDA_HELPERS_H

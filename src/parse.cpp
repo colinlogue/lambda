@@ -8,6 +8,7 @@
 #include "lang_tools/parse/parse.hpp"
 #include "result/Result.hpp"
 #include "parse.h"
+#include "numerals.h"
 
 
 //      Grammar
@@ -19,7 +20,9 @@
 //          |	Appl Atom
 //    Atom ->	( Term )
 //          |	Name
-//    Name →	[a-zA-Z]+
+//    Name ->	[a-zA-Z]+
+//          |   Numeral
+// Numeral ->   [0-9]+
 //
 
 namespace lambda
@@ -40,6 +43,10 @@ namespace lambda
         // if token is name return ok
         if (tok.type == TokenType::Name)
             return ParseResult::make_ok(Variable { tok.value });
+
+        // or if numeral return ok
+        else if (tok.type == TokenType::Numeral)
+            return parse_numeral(tok.value);
 
         // otherwise err
         return unexpected_token(TokenType::Name, tok.type);

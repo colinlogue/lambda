@@ -34,7 +34,12 @@ namespace lang_tools
         {
             state_t() = default;
 
+            // this flag determines when to exit the read-eval-print loop
             bool exit_flag {false};
+
+            // this flag determines whether to replace fully evaluated terms
+            // with their context name (if they exist in the context)
+            bool eval_to_names {false};
         };
 
         class Command
@@ -270,13 +275,15 @@ namespace lang_tools
             Term* ok {parse_result.get_ok()};
             EvalResult<Value> eval_result {evaluator(*ok, context)};
 
-            Value* val {eval_result.get_ok()};
-            if (val != nullptr)
-                out << *val << std::endl;
-            else // evaluation error
+            Value* ok_val {eval_result.get_ok()};
+            if (ok_val == nullptr)
             {
                 EvalErr* eval_err {eval_result.get_err()};
                 out << "evaluation error: " << *eval_err << std::endl;
+            }
+            else // no error
+            {
+                out << *ok_val << std::endl;
             }
             return;
         }
