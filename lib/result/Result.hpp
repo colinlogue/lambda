@@ -51,6 +51,9 @@ namespace result
         template <typename ErrB>
         auto map_err(std::function<ErrB(ErrType)> f) -> Result<OkType, ErrB>;
 
+        template <typename OkB, typename ErrB>
+        auto map_both(std::function<OkB(OkType)> f, std::function<ErrB(ErrType)> g) -> Result<OkB, ErrB>;
+
         template <typename OkB>
         auto and_then(std::function<Result<OkB, ErrType>(OkType)> f) -> Result<OkB, ErrType>;
 
@@ -102,8 +105,9 @@ namespace result
     {
         auto ok = std::get_if<ok_index>(&data);
         if (ok)
-            return make_ok(f(*ok));
-        return make_err(*get_err());
+            return f(*ok);
+
+        return Result<OkB, ErrType>::make_err(*get_err());
     }
 
     template<typename OkType, typename ErrType>
@@ -112,9 +116,9 @@ namespace result
     {
         auto ok = std::get_if<ok_index>(&data);
         if (ok)
-            return make_ok(f(*ok));
+            return Result<OkB, ErrType>::make_ok(f(*ok));
 
-        return make_err();
+        return Result<OkB, ErrType>::make_err(*get_err());
     }
 
     template<typename OkType, typename ErrType>
@@ -123,9 +127,9 @@ namespace result
     {
         auto err = std::get_if<err_index>(&data);
         if (err)
-            return make_ok(f(*err));
+            return Result<OkType, ErrB>::make_err(f(*err));
 
-        return make_err();
+        return Result<OkType, ErrB>::make_ok(*get_ok());
     }
 
     template<typename T, typename U>
@@ -163,6 +167,16 @@ namespace result
     {
         data = ok;
         return *this;
+    }
+
+    template<typename OkType, typename ErrType>
+    template<typename OkB, typename ErrB>
+    auto
+    Result<OkType, ErrType>::map_both(std::function<OkB(OkType)> f, std::function<ErrB(ErrType)> g) -> Result<OkB, ErrB>
+    {
+        if (is_ok())
+            return Result<OkB, ErrB>::make_ok(f(*get_ok()));
+        return Result<OkB, ErrB>::make_err(g(*get_err()));
     }
 
     template<typename OkType, typename ErrType>

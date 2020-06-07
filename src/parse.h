@@ -5,12 +5,14 @@
 #ifndef LAMBDA_PARSE_H
 #define LAMBDA_PARSE_H
 
+#include <fstream>
 #include <queue>
 #include <string>
 #include <memory>
 #include <utility>
 
 #include "lang_tools/parse/parse.hpp"
+#include "lang_tools/eval/eval.hpp"
 #include "lex.h"
 #include "result/Result.hpp"
 
@@ -61,13 +63,13 @@ namespace lambda
         }
     };
 
+
+    using Substitution = std::pair<std::string, Term>;
     using lang_tools::ParseErr;
 
     using ParseResult = lang_tools::ParseResult<Term>;
 
     auto parse(std::queue<Token> tokens) -> ParseResult;
-
-    using Substitution = std::pair<std::string, Term>;
 
     auto substitute(Substitution sub, const Term& term) -> Term;
 
@@ -76,6 +78,8 @@ namespace lambda
     auto operator <<(std::ostream& out, const Term& term) -> std::ostream&;
 
     auto parse_string(std::string str) -> std::optional<Term>;
+
+    auto parse_file(std::fstream& file) -> lang_tools::ParseResult<lang_tools::Context<Term>>;
 }
 
 #endif //LAMBDA_PARSE_H

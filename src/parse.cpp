@@ -291,4 +291,55 @@ namespace lambda
         if (term) return *term;
         return {};
     }
+
+    auto with_name(const std::string& name) -> std::function<std::pair<std::string, Term>(Term)>
+    {
+        return [name](const Term& t) -> std::pair<std::string, Term> { return {name, t}; };
+    }
+
+    auto parse_line(std::string line) -> lang_tools::ParseResult<std::pair<std::string, Term>>
+    {
+        std::stringstream stream {line};
+        std::string name;
+        stream >> name;
+        std::string assignment;
+        stream >> assignment;
+        if (assignment != "=")
+        {
+            std::stringstream err_msg{};
+            err_msg << "Expected =, got " << assignment;
+            return lang_tools::ParseResult<std::pair<std::string, Term>>::make_err(err_msg.str());
+        }
+        std::function<ParseErr(std::queue<lang_tools::LexErr>)> to_parse_err =
+            [](std::queue<lang_tools::LexErr> errs) -> ParseErr
+            {
+                std::stringstream err_msg {"Lex errors: "};
+                while (!errs.empty())
+                {
+                    err_msg << errs.front();
+                    errs.pop();
+                }
+                return err_msg.str();
+            };
+        return lex_all(stream)
+                .map_err<ParseErr>(to_parse_err)
+                .and_then<Term>(parse)
+                .map_ok<std::pair<std::string, Term>>(with_name(name));
+    }
+
+    auto parse_file(std::fstream& file) -> lang_tools::ParseResult<lang_tools::Context<Term>>
+    {
+        lang_tools::Context<Term> context {};
+        std::string buffer {};
+        while (std::getline(file, buffer))
+        {
+            auto parse_result {parse_line(buffer)};
+            Substitution* as_sub {parse_result.get_ok()};
+            if (as_sub == nullptr)
+                return lang_tools::ParseResult<lang_tools::Context<Term>>::make_err(*parse_result.get_err());
+            else
+                context.insert(*as_sub);
+        }
+        return lang_tools::ParseResult<lang_tools::Context<Term>>::make_ok(context);
+    }
 }

@@ -27,6 +27,8 @@ namespace lambda
     auto as_string(TokenType token) -> std::string;
     auto lex(std::istream& in) -> lang_tools::LexResult<Token>;
 
+    auto lex_all(std::istream& in) -> result::Result<std::queue<Token>, std::queue<lang_tools::LexErr>>;
+
     class TokenStream
     {
     public:

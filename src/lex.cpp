@@ -6,6 +6,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <queue>
 
 #include "lang_tools/utils/utils.h"
 
@@ -148,4 +149,24 @@ namespace lambda
         return lang_tools::token_iterator<Token>();
     }
 
+    auto lex_all(std::istream& in) -> result::Result<std::queue<Token>, std::queue<lang_tools::LexErr>>
+    {
+        std::queue<Token> tokens {};
+        std::queue<lang_tools::LexErr> failures {};
+        for (LexResult lex_result : TokenStream(in))
+        {
+            Token* as_token {lex_result.get_ok()};
+            if (as_token)
+                tokens.push(*as_token);
+            else
+                failures.push(*lex_result.get_err());
+        }
+
+        // if no failures, return tokens
+        if (failures.empty())
+            return result::Result<std::queue<Token>, std::queue<lang_tools::LexErr>>::make_ok(tokens);
+
+        // otherwise return failures
+        return result::Result<std::queue<Token>, std::queue<lang_tools::LexErr>>::make_err(failures);
+    }
 }
